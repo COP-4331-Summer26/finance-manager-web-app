@@ -1,6 +1,7 @@
 // backend/server.js
 const express = require('express');
 const cors = require('cors');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 // 1. Initialize the Express application
@@ -12,6 +13,15 @@ app.use(express.json()); // Automatically parses incoming JSON data in request b
 
 // 3. Define the port (Fallback to 5000 if not specified in the environment)
 const PORT = process.env.PORT || 5000;
+
+
+mongoose.connect(process.env.MONGO_URI)
+    .then(() => {
+        console.log("[Database] Successfully connected to MongoDB Atlas!");
+    })
+    .catch((error => {
+        console.error("[Database] Connection failed:", error.message);
+    }))
 
 // 4. Create a simple health-check endpoint
 app.get('/api/status', (req, res) => {
