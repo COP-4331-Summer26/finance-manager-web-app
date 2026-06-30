@@ -23,6 +23,9 @@ mongoose.connect(process.env.MONGO_URI)
         console.error("[Database] Connection failed:", error.message);
     }))
 
+const transactionRoutes = require('./API/transactions');
+app.use('/api/transactions', transactionRoutes);
+
 // 4. Create a simple health-check endpoint
 app.get('/api/status', (req, res) => {
     res.json({ message: "Contact Manager API is up and running!" });
