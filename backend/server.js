@@ -14,7 +14,6 @@ app.use(express.json()); // Automatically parses incoming JSON data in request b
 // 3. Define the port (Fallback to 5000 if not specified in the environment)
 const PORT = process.env.PORT || 5000;
 
-
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log("[Database] Successfully connected to MongoDB Atlas!");
