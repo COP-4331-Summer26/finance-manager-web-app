@@ -23,7 +23,7 @@ mongoose.connect(process.env.MONGO_URI)
         console.error("[Database] Connection failed:", error.message);
     }))
 
-const transactionRoutes = require('./API/transactions');
+const transactionRoutes = require('./routes/transactions');
 app.use('/api/transactions', transactionRoutes);
 
 // 4. Create a simple health-check endpoint

@@ -3,11 +3,11 @@ const router = express.Router();
 const Transaction = require('../models/Transaction'); 
 
 // Create
-router.post('/', async (req, res) => {
+router.post('/', async (req, res) => { // Notes: Post listens for a post request from the browser and when it hears a request it will run this code
     try {
-        const { userId, title, amount, type, category, date, cardLastFour } = req.body;
+        const { userId, title, amount, type, category, date, cardLastFour } = req.body; // Declaring variables from req.body
 
-        const newTransaction = new Transaction({
+        const newTransaction = new Transaction({ // Short hand version of writing key: value pairs
             userId, title, amount, type, category, date, cardLastFour
         });
 
