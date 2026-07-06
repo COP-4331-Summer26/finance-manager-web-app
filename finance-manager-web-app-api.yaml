@@ -1,0 +1,10 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: ''
+  description: ''
+paths: {}
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/ucf-e31/finance-manager-web-app/1.0.0
