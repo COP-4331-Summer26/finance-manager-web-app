@@ -22,12 +22,18 @@ mongoose.connect(process.env.MONGO_URI)
         console.error("[Database] Connection failed:", error.message);
     }))
 
-const transactionRoutes = require('./routes/transactions');
-app.use('/api/transactions', transactionRoutes);
+// Routes
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/users', require('./routes/users'));
+app.use('/api/transactions', require('./routes/transactions'));
+app.use('/api/categories', require('./routes/categories'));
+app.use('/api/cards', require('./routes/cards'));
+app.use('/api/income', require('./routes/income'));
+app.use('/api/summary', require('./routes/summary'));
 
 // 4. Create a simple health-check endpoint
 app.get('/api/status', (req, res) => {
-    res.json({ message: "Contact Manager API is up and running!" });
+    res.json({ message: "Finance Manager API is up and running!" });
 });
 
 // 5. Boot up the server
