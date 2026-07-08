@@ -5,4 +5,7 @@ const { register, login } = require('../controllers/authController');
 router.post('/register', register);
 router.post('/login', login);
 
+router.post('/verify-code', authController.verifyCode);
+router.post('/resend-code', authController.resendCode);
+
 module.exports = router;
