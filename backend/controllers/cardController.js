@@ -33,3 +33,41 @@ exports.createCard = async (req, res) => {
     res.status(500).json({ error: 'Failed to create card' });
   }
 };
+
+// PUT /api/cards/:id
+exports.updateCard = async (req, res) => {
+  try {
+    const card = await Card.findOneAndUpdate(
+      { _id: req.params.id, userId: req.user.id },
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+    if (!card) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+    res.json(card);
+  } catch (err) {
+    console.error('updateCard error:', err);
+    if (err.name === 'ValidationError') {
+      return res.status(400).json({ error: err.message });
+    }
+    res.status(500).json({ error: 'Failed to update card' });
+  }
+};
+
+// DELETE /api/cards/:id
+exports.deleteCard = async (req, res) => {
+  try {
+    const card = await Card.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.id
+    });
+    if (!card) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+    res.json({ message: 'Card deleted' });
+  } catch (err) {
+    console.error('deleteCard error:', err);
+    res.status(500).json({ error: 'Failed to delete card' });
+  }
+};

@@ -52,3 +52,25 @@ exports.getCategories = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch categories' });
   }
 };
+
+const Transaction = require('../models/Transaction');
+
+// DELETE /api/categories/:id
+exports.deleteCategory = async (req, res) => {
+  try {
+    const category = await Category.findOne({ _id: req.params.id, userId: req.user.id });
+    if (!category) {
+      return res.status(404).json({ error: 'Category not found' });
+    }
+
+    // Cascade delete: remove every transaction tagged with this category's name
+    await Transaction.deleteMany({ userId: req.user.id, category: category.name });
+
+    await Category.deleteOne({ _id: category._id });
+
+    res.json({ message: 'Category and associated transactions deleted' });
+  } catch (err) {
+    console.error('deleteCategory error:', err);
+    res.status(500).json({ error: 'Failed to delete category' });
+  }
+};
