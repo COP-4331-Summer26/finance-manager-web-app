@@ -2,12 +2,39 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+function validatePasswordComplexity(password) {
+  const errors = [];
+
+  if (!password || password.length < 8) {
+    errors.push('Password must be at least 8 characters long');
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push('Password must contain at least one uppercase letter');
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push('Password must contain at least one lowercase letter');
+  }
+  if (!/[0-9]/.test(password)) {
+    errors.push('Password must contain at least one number');
+  }
+  if (!/[^A-Za-z0-9]/.test(password)) {
+    errors.push('Password must contain at least one special character');
+  }
+
+  return errors;
+}
+
 // POST /api/v1/auth/register
 exports.register = async (req, res) => {
   try {
     const { email, password, name } = req.body;
     if (!email || !password || !name) {
       return res.status(400).json({ error: 'email, password, and name are required' });
+    }
+
+    const passwordErrors = validatePasswordComplexity(password);
+    if (passwordErrors.length > 0) {
+      return res.status(400).json({ error: 'Password does not meet complexity requirements', details: passwordErrors });
     }
 
     const existing = await User.findOne({ email: email.toLowerCase() });
