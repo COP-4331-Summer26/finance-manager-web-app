@@ -83,6 +83,16 @@ exports.verifyCode = async (req, res) => {
       return res.status(404).json({ error: 'User account not found' });
     }
 
+    // Guard: If they double-click, just let them pass through smoothly
+    if (user.isVerified) {
+      const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+      return res.status(200).json({
+        message: 'Account successfully verified!',
+        token,
+        user: { id: user._id, email: user.email, name: user.name }
+      });
+    }
+
     // Guard: Check if code matches
     if (user.verificationCode !== code) {
       return res.status(400).json({ error: 'Incorrect verification code' });
