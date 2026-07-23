@@ -1,6 +1,11 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { ApiError } from "../api/client";
+import VerifyEmailModal from "../components/VerifyEmailModal";
+import ForgotPasswordModal from "../components/ForgotPasswordModal";
+import PasswordRequirementsChecklist from "../components/PasswordRequirementsChecklist";
+import { isPasswordValid } from "../utils/passwordRequirements";
 import type { AuthMode } from "../types";
 
 interface Candle {
@@ -34,12 +39,15 @@ export default function LoginPage() {
 
   const [mode, setMode] = useState<AuthMode>("login");
   const [showPw, setShowPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [verifyingEmail, setVerifyingEmail] = useState<string | null>(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const isSignup = mode === "signup";
 
@@ -51,23 +59,35 @@ export default function LoginPage() {
       return;
     }
 
+    if (isSignup && !isPasswordValid(password)) {
+      setError("Password doesn't meet the requirements below.");
+      return;
+    }
+
     setLoading(true);
     try {
       if (isSignup) {
-        await register(name, email, password);
+        const res = await register(name, email, password);
+        setVerifyingEmail(res.email);
       } else {
         await login(email, password);
+        navigate("/");
       }
-      navigate("/");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      if (e instanceof ApiError && e.requiresVerification) {
+        setVerifyingEmail(email);
+      } else if (e instanceof ApiError && e.details?.length) {
+        setError(e.details.join(" "));
+      } else {
+        setError(e instanceof Error ? e.message : "Something went wrong.");
+      }
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="flex h-screen w-full bg-bg font-sans overflow-hidden">
+    <main className="flex h-screen w-full bg-bg font-sans overflow-hidden">
 
       <style>{`
         @keyframes floatY { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-18px); } }
@@ -109,7 +129,7 @@ export default function LoginPage() {
 
         <div className="relative px-10 pt-9 z-[2]">
           <div className="flex items-center gap-2.5">
-            <div className="w-[38px] h-[38px] rounded-[11px] bg-gradient-to-br from-accent to-cyan flex items-center justify-center text-[19px] font-extrabold text-white">
+            <div className="w-[38px] h-[38px] rounded-[11px] bg-accent-dark flex items-center justify-center text-[19px] font-extrabold text-white">
               $
             </div>
             <div className="text-text font-extrabold text-base tracking-tight">User Capital Flow</div>
@@ -209,7 +229,10 @@ export default function LoginPage() {
               <div className="flex justify-between items-center mb-1.5">
                 <label className="text-sub text-[11px] font-bold uppercase tracking-wider">Password</label>
                 {!isSignup && (
-                  <button className="bg-transparent border-none text-accent-light text-xs font-semibold">
+                  <button
+                    onClick={() => setShowForgotPassword(true)}
+                    className="bg-transparent border-none text-accent-light text-xs font-semibold p-2 -m-2"
+                  >
                     Forgot password?
                   </button>
                 )}
@@ -224,23 +247,32 @@ export default function LoginPage() {
                 />
                 <button
                   onClick={() => setShowPw((s) => !s)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 bg-transparent border-none text-sub text-xs"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 bg-transparent border-none text-sub text-xs p-2"
                 >
                   {showPw ? "Hide" : "Show"}
                 </button>
               </div>
+              {isSignup && <PasswordRequirementsChecklist password={password} />}
             </div>
 
             {isSignup && (
               <div>
                 <label className="block text-sub text-[11px] font-bold mb-1.5 uppercase tracking-wider">Confirm Password</label>
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full bg-card border border-border rounded-[9px] px-3.5 py-2.5 text-text text-sm outline-none box-border focus:border-accent focus:ring-2 focus:ring-accent/25 placeholder:text-sub"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    type={showConfirmPw ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full bg-card border border-border rounded-[9px] px-3.5 py-2.5 pr-11 text-text text-sm outline-none box-border focus:border-accent focus:ring-2 focus:ring-accent/25 placeholder:text-sub"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    onClick={() => setShowConfirmPw((s) => !s)}
+                    className="absolute right-1 top-1/2 -translate-y-1/2 bg-transparent border-none text-sub text-xs p-2"
+                  >
+                    {showConfirmPw ? "Hide" : "Show"}
+                  </button>
+                </div>
               </div>
             )}
 
@@ -249,7 +281,7 @@ export default function LoginPage() {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="mt-1.5 w-full py-3 rounded-[10px] border-none bg-gradient-to-br from-accent to-cyan text-white font-bold text-[14.5px] shadow-[0_8px_24px_#6366F140] disabled:opacity-60"
+              className="mt-1.5 w-full py-3 rounded-[10px] border-none bg-accent-dark text-white font-bold text-[14.5px] shadow-[0_8px_24px_#6366F140] disabled:opacity-60"
             >
               {loading ? (isSignup ? "Creating account..." : "Logging in...") : isSignup ? "Create account" : "Log in"}
             </button>
@@ -259,13 +291,27 @@ export default function LoginPage() {
             {isSignup ? "Already have an account? " : "Don't have an account? "}
             <button
               onClick={() => { setMode(isSignup ? "login" : "signup"); setError(null); }}
-              className="bg-transparent border-none text-accent-light font-bold text-[13.5px] p-0"
+              className="bg-transparent border-none text-accent-light font-bold text-[13.5px] p-2 -m-2"
             >
               {isSignup ? "Log in" : "Create one"}
             </button>
           </p>
         </div>
       </div>
-    </div>
+
+      {verifyingEmail && (
+        <VerifyEmailModal email={verifyingEmail} onClose={() => setVerifyingEmail(null)} />
+      )}
+
+      {showForgotPassword && (
+        <ForgotPasswordModal
+          onClose={() => setShowForgotPassword(false)}
+          onDone={() => {
+            setMode("login");
+            setError(null);
+          }}
+        />
+      )}
+    </main>
   );
 }

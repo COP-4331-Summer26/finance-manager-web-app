@@ -1,13 +1,34 @@
-import React from "react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import ConfirmModal from "../components/ConfirmModal";
+import { api } from "../api/client";
+import { useAuth } from "../context/AuthContext";
+
+type SettingsAction = "budget" | "account" | null;
 
 export default function SettingsPage() {
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const [modal, setModal] = useState<SettingsAction>(null);
+
+  async function handleDeleteBudget() {
+    const categories = await api.getCategories();
+    await Promise.all(categories.map((c) => api.deleteCategory(c.id)));
+  }
+
+  async function handleDeleteAccount() {
+    await api.deleteAccount();
+    logout();
+    navigate("/login");
+  }
+
   return (
     <div className="flex h-screen bg-bg overflow-hidden text-text font-sans">
 
       <Sidebar activePage="Settings" />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden">
 
         <div className="px-[26px] pt-5 shrink-0">
           <h1 className="text-text font-extrabold text-[22px] tracking-tight m-0">Settings</h1>
@@ -27,15 +48,13 @@ export default function SettingsPage() {
               <div className="pr-5">
                 <div className="text-text text-sm font-bold mb-1">Delete Budget</div>
                 <div className="text-sub text-[12.5px] leading-relaxed">
-                  Remove all budget categories and spending limits. Transactions stay intact.
-                </div>
-                <div className="text-sub text-[11px] mt-1.5 italic">
-                  Not supported by the API yet — no delete endpoint exists for categories.
+                  Removes every budget category — and any transactions tagged with those categories.
+                  Income and uncategorized transactions are unaffected.
                 </div>
               </div>
               <button
-                disabled
-                className="shrink-0 px-4 py-2.5 rounded-[9px] border border-red/25 bg-red/[0.03] text-red/40 font-bold text-sm whitespace-nowrap cursor-not-allowed"
+                onClick={() => setModal("budget")}
+                className="shrink-0 px-4 py-2.5 rounded-[9px] border border-red/50 bg-red/[0.07] text-red font-bold text-sm whitespace-nowrap"
               >
                 Delete Budget
               </button>
@@ -48,20 +67,39 @@ export default function SettingsPage() {
                 <div className="text-sub text-[12.5px] leading-relaxed">
                   Permanently delete your account and all associated data. This cannot be undone.
                 </div>
-                <div className="text-sub text-[11px] mt-1.5 italic">
-                  Not supported by the API yet — no delete endpoint exists for users.
-                </div>
               </div>
               <button
-                disabled
-                className="shrink-0 px-4 py-2.5 rounded-[9px] border-none bg-red/20 text-white/50 font-bold text-sm whitespace-nowrap cursor-not-allowed"
+                onClick={() => setModal("account")}
+                className="shrink-0 px-4 py-2.5 rounded-[9px] border-none bg-red-dark text-white font-bold text-sm whitespace-nowrap shadow-[0_0_16px_#F43F5E40]"
               >
                 Delete Account
               </button>
             </div>
           </div>
         </div>
-      </div>
+      </main>
+
+      {modal === "budget" && (
+        <ConfirmModal
+          title="Delete Budget"
+          body="This removes every budget category you've created, and any transactions tagged with those categories. Income and uncategorized transactions are unaffected. This cannot be undone."
+          cta="Delete Budget"
+          confirmWord="DELETE"
+          onClose={() => setModal(null)}
+          onConfirm={handleDeleteBudget}
+        />
+      )}
+
+      {modal === "account" && (
+        <ConfirmModal
+          title="Delete Account"
+          body="This permanently deletes your account, transactions, budget categories, and linked cards. This cannot be undone."
+          cta="Delete Account"
+          confirmWord="DELETE"
+          onClose={() => setModal(null)}
+          onConfirm={handleDeleteAccount}
+        />
+      )}
     </div>
   );
 }

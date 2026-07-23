@@ -19,15 +19,16 @@ interface AddEntryModalProps {
 
 interface ModalConfig {
   title: string;
-  color: string;
+  color: string;       // bright accent for the small decorative dot (no text on it)
+  buttonColor: string; // darker, WCAG AA-safe background for the Save button (has white text)
   fields: string[];
 }
 
 const CONFIGS: Record<AddModalKind, ModalConfig> = {
-  income:      { title: "Add Income",      color: C.green,  fields: ["Type", "Source", "Amount", "Date", "Notes"] },
-  transaction: { title: "Add Transaction", color: C.accent, fields: ["Merchant", "Amount", "Category", "Date", "Notes"] },
-  card:        { title: "Add Credit Card", color: C.amber,  fields: ["Card Name", "Last 4 Digits", "Credit Limit", "Statement Date"] },
-  category:    { title: "Add Budget Category", color: "#22D3EE", fields: ["Name", "Limit"] },
+  income:      { title: "Add Income",      color: C.green,  buttonColor: C.greenDark,  fields: ["Type", "Source", "Amount", "Date", "Notes"] },
+  transaction: { title: "Add Transaction", color: C.accent, buttonColor: C.accentDark, fields: ["Merchant", "Amount", "Category", "Date", "Notes"] },
+  card:        { title: "Add Credit Card", color: C.amber,  buttonColor: C.amberDark,  fields: ["Card Name", "Last 4 Digits", "Credit Limit", "Statement Date"] },
+  category:    { title: "Add Budget Category", color: C.cyan, buttonColor: C.cyanDark, fields: ["Name", "Limit"] },
 };
 
 // A small curated palette instead of a raw hex input — keeps category colors
@@ -119,7 +120,7 @@ export default function AddEntryModal({ type, onClose, onSaved, categories = [] 
             />
             <h2 className="text-text font-bold text-[17px] m-0">{cfg.title}</h2>
           </div>
-          <button onClick={onClose} className="bg-transparent border-none text-sub cursor-pointer text-lg leading-none">
+          <button onClick={onClose} className="bg-transparent border-none text-sub cursor-pointer text-lg leading-none p-2 -m-2">
             ✕
           </button>
         </div>
@@ -168,6 +169,23 @@ export default function AddEntryModal({ type, onClose, onSaved, categories = [] 
                     onChange={(e) => setField(f, e.target.value)}
                     className="w-full bg-bg border border-border rounded-[9px] px-[13px] py-2.5 text-text text-sm outline-none box-border focus:border-accent focus:ring-2 focus:ring-accent/25"
                   />
+                </div>
+              );
+            }
+            if (f === "Statement Date") {
+              return (
+                <div key={f}>
+                  <label className="block text-sub text-[11px] font-bold mb-1.5 uppercase tracking-wider">{f}</label>
+                  <select
+                    value={values[f] || ""}
+                    onChange={(e) => setField(f, e.target.value)}
+                    className="w-full bg-bg border border-border rounded-[9px] px-[13px] py-2.5 text-text text-sm outline-none box-border focus:border-accent focus:ring-2 focus:ring-accent/25"
+                  >
+                    <option value="" disabled>Select a day</option>
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                      <option key={day} value={day}>{day}</option>
+                    ))}
+                  </select>
                 </div>
               );
             }
@@ -220,7 +238,7 @@ export default function AddEntryModal({ type, onClose, onSaved, categories = [] 
             onClick={handleSave}
             disabled={saving}
             className="flex-[2] py-[11px] rounded-[9px] border-none text-white font-bold text-sm disabled:opacity-60"
-            style={{ background: cfg.color, boxShadow: `0 0 20px ${cfg.color}55` }}
+            style={{ background: cfg.buttonColor, boxShadow: `0 0 20px ${cfg.buttonColor}55` }}
           >
             {saving ? "Saving..." : "Save"}
           </button>

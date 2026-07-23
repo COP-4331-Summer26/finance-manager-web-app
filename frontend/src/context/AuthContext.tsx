@@ -6,7 +6,13 @@ interface AuthContextValue {
   user: UserSummary | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  /** Kicks off registration — does NOT log the user in. The backend always
+   *  requires verification after registering, so success here means "show
+   *  the code-entry modal", regardless of any specific flag in the response. */
+  register: (name: string, email: string, password: string) => Promise<{ message: string; email: string }>;
+  /** Completes signup after the user enters the code from their email — logs them in on success. */
+  verifyEmail: (email: string, code: string) => Promise<void>;
+  resendVerification: (email: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -37,8 +43,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const register = useCallback(async (name: string, email: string, password: string) => {
     const res = await api.register({ name, email, password });
+    return res;
+  }, []);
+
+  const verifyEmail = useCallback(async (email: string, code: string) => {
+    const res = await api.verifyEmail({ email, code });
     setToken(res.token);
     setUser(res.user);
+  }, []);
+
+  const resendVerification = useCallback(async (email: string) => {
+    await api.resendVerification({ email });
   }, []);
 
   const logout = useCallback(() => {
@@ -47,7 +62,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, verifyEmail, resendVerification, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -100,7 +100,7 @@ export default function TransactionsPage() {
 
       <Sidebar activePage="Transactions" />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden">
 
         <div className="px-[26px] pt-5 flex justify-between items-end shrink-0">
           <div>
@@ -111,7 +111,7 @@ export default function TransactionsPage() {
             onClick={() => categories.length > 0 && setModal("transaction")}
             disabled={categories.length === 0}
             title={categories.length === 0 ? "Add a budget category first" : undefined}
-            className="flex items-center gap-[7px] px-4 py-2.5 rounded-[9px] border-none bg-accent text-white font-bold text-sm shadow-[0_0_20px_#6366F145] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
+            className="flex items-center gap-[7px] px-4 py-2.5 rounded-[9px] border-none bg-accent-dark text-white font-bold text-sm shadow-[0_0_20px_#6366F145] disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
           >
             <span className="font-extrabold text-base leading-none">+</span> Add Transaction
           </button>
@@ -163,7 +163,7 @@ export default function TransactionsPage() {
 
         <div className="flex-1 mx-[26px] mt-4 mb-[22px] bg-card border border-border rounded-2xl overflow-hidden flex flex-col min-h-0">
 
-          <div className="grid grid-cols-[2fr_1.1fr_0.9fr_0.9fr_70px] gap-2.5 px-[22px] py-[13px] border-b border-border shrink-0">
+          <div className="grid grid-cols-[2fr_1.1fr_0.9fr_0.9fr_80px] gap-2.5 px-[22px] py-[13px] border-b border-border shrink-0">
             <span className="text-sub text-[11px] font-bold uppercase tracking-wide">Merchant</span>
             <span className="text-sub text-[11px] font-bold uppercase tracking-wide">Category</span>
             <button onClick={() => toggleSort("date")} className="bg-transparent border-none cursor-pointer text-left p-0 text-sub text-[11px] font-bold uppercase tracking-wide">
@@ -193,7 +193,7 @@ export default function TransactionsPage() {
               return (
                 <div
                   key={t.id}
-                  className={`grid grid-cols-[2fr_1.1fr_0.9fr_0.9fr_70px] gap-2.5 items-center px-[22px] py-[11px] ${i === filtered.length - 1 ? "" : "border-b border-border"}`}
+                  className={`grid grid-cols-[2fr_1.1fr_0.9fr_0.9fr_80px] gap-2.5 items-center px-[22px] py-[11px] ${i === filtered.length - 1 ? "" : "border-b border-border"}`}
                 >
                   <div className="flex items-center gap-[11px] min-w-0">
                     <div
@@ -218,14 +218,14 @@ export default function TransactionsPage() {
                     <button
                       onClick={() => setEditingTx(t)}
                       title="Edit"
-                      className="text-sub hover:text-accent-light text-sm bg-transparent border-none cursor-pointer p-0"
+                      className="text-sub hover:text-accent-light text-sm bg-transparent border-none cursor-pointer p-1.5"
                     >
                       ✏️
                     </button>
                     <button
                       onClick={() => setDeletingTx(t)}
                       title="Delete"
-                      className="text-sub hover:text-red text-sm bg-transparent border-none cursor-pointer p-0"
+                      className="text-sub hover:text-red text-sm bg-transparent border-none cursor-pointer p-1.5"
                     >
                       🗑️
                     </button>
@@ -235,7 +235,7 @@ export default function TransactionsPage() {
             })}
           </div>
         </div>
-      </div>
+      </main>
 
       {modal && (
         <AddEntryModal

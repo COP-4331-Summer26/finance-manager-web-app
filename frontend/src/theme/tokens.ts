@@ -9,12 +9,17 @@ export const C = {
   border:  "#232840",
   accent:  "#6366F1",
   accentL: "#818CF8",
+  accentDark: "#4338CA",
   cyan:    "#22D3EE",
+  cyanDark: "#0E7490",
   text:    "#F1F5F9",
-  sub:     "#5A6481",
+  sub:     "#8790AC",
   green:   "#10B981",
+  greenDark: "#047857",
   red:     "#F43F5E",
+  redDark: "#BE123C",
   amber:   "#F59E0B",
+  amberDark: "#B45309",
 } as const;
 
 export const CAT_COLORS: Record<string, string> = {

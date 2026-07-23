@@ -36,7 +36,7 @@ export default function Sidebar({ activePage, children }: SidebarProps) {
       {/* Logo */}
       <div className="px-[18px] pt-[22px] pb-6">
         <div className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-[11px] bg-gradient-to-br from-accent to-cyan flex items-center justify-center text-lg font-extrabold text-white shrink-0">
+          <div className="w-9 h-9 rounded-[11px] bg-accent-dark flex items-center justify-center text-lg font-extrabold text-white shrink-0">
             $
           </div>
           <div className="text-text font-extrabold text-sm tracking-tight leading-tight">
@@ -75,7 +75,7 @@ export default function Sidebar({ activePage, children }: SidebarProps) {
 
       {/* User footer */}
       <div className="px-[18px] pt-3.5 pb-[18px] border-t border-border flex items-center gap-2.5">
-        <div className="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-accent to-cyan flex items-center justify-center text-white font-extrabold text-sm shrink-0">
+        <div className="w-[34px] h-[34px] rounded-full bg-accent-dark flex items-center justify-center text-white font-extrabold text-sm shrink-0">
           {displayName.charAt(0).toUpperCase()}
         </div>
         <div className="min-w-0 flex-1">
@@ -83,7 +83,7 @@ export default function Sidebar({ activePage, children }: SidebarProps) {
         </div>
         <button
           onClick={handleLogout}
-          className="text-sub text-xs hover:text-red shrink-0"
+          className="text-sub text-xs hover:text-red shrink-0 p-2 -m-2"
         >
           Log out
         </button>

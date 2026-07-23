@@ -1,15 +1,16 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import Sidebar from "../components/Sidebar";
 import AddEntryModal from "../components/AddEntryModal";
 import ViewCardsModal from "../components/ViewCardsModal";
+import ConfirmModal from "../components/ConfirmModal";
 import { api } from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { iconForCategory } from "../utils/categoryIcons";
 import { formatDate } from "../utils/format";
 import { C, INCOME_TYPE_COLORS } from "../theme/tokens";
-import type { AddModalKind, SummaryResponse, Transaction } from "../types";
+import type { AddModalKind, SummaryResponse, Transaction, Category } from "../types";
 
 function currentMonth(): string {
   return new Date().toISOString().slice(0, 7);
@@ -48,6 +49,8 @@ export default function Dashboard() {
   const [hoveredCat, setHoveredCat] = useState<string | null>(null);
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [recent, setRecent] = useState<Transaction[]>([]);
+  const [categoryList, setCategoryList] = useState<Category[]>([]);
+  const [deletingCategory, setDeletingCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,12 +58,14 @@ export default function Dashboard() {
     setLoading(true);
     setError(null);
     try {
-      const [summaryRes, txRes] = await Promise.all([
+      const [summaryRes, txRes, catRes] = await Promise.all([
         api.getSummary(currentMonth()),
         api.getTransactions({ limit: 6, sort: "-date" }),
+        api.getCategories(),
       ]);
       setSummary(summaryRes);
       setRecent(txRes);
+      setCategoryList(catRes);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load dashboard data.");
     } finally {
@@ -103,7 +108,7 @@ export default function Dashboard() {
           </div>
           {([
             { label: "Add Income",        kind: "income",      color: "#10B981" },
-            { label: "Add Transaction",   kind: "transaction", color: "#6366F1" },
+            { label: "Add Transaction",   kind: "transaction", color: "#818CF8" },
             { label: "Add Category",      kind: "category",    color: "#22D3EE" },
             { label: "View Credit Cards", kind: "viewCards",   color: "#F59E0B" },
           ] as const).map((btn) => {
@@ -133,7 +138,7 @@ export default function Dashboard() {
         </div>
       </Sidebar>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden">
 
         {/* Header */}
         <div className="px-[26px] pt-5 flex justify-between items-end shrink-0">
@@ -158,7 +163,7 @@ export default function Dashboard() {
             <div key={stat.label} className="bg-card border border-border rounded-[13px] px-[18px] py-4">
               <p className="text-sub text-[11px] font-bold uppercase tracking-wider mb-2.5">{stat.label}</p>
               <span className="text-text text-2xl font-extrabold tracking-tight tabular-nums">
-                ${stat.value.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                {stat.value < 0 ? "−" : ""}${Math.abs(stat.value).toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </span>
             </div>
           ))}
@@ -170,7 +175,7 @@ export default function Dashboard() {
           <div className="flex-1 flex flex-col gap-3.5 overflow-hidden min-h-0">
 
             {/* Donut chart card */}
-            <div className="flex-[3] bg-card border border-border rounded-2xl px-[22px] py-[18px] flex flex-col min-h-0">
+            <div className="flex-1 bg-card border border-border rounded-2xl px-[22px] py-[18px] flex flex-col min-h-0">
               <div className="flex justify-between items-center mb-2 shrink-0">
                 <h2 className="text-text font-bold text-[15px] m-0">Spending by Category</h2>
                 <div className="flex gap-3 flex-wrap justify-end">
@@ -239,9 +244,9 @@ export default function Dashboard() {
             </div>
 
             {/* Category breakdown */}
-            <div className="bg-card border border-border rounded-2xl px-[18px] py-[11px] shrink-0">
-              <h2 className="text-text font-bold text-xs mb-2 mt-0">Category Breakdown</h2>
-              <div className="flex flex-col gap-1.5">
+            <div className="bg-card border border-border rounded-2xl px-[18px] py-[11px] shrink-0 h-[190px] flex flex-col">
+              <h2 className="text-text font-bold text-xs mb-2 mt-0 shrink-0">Category Breakdown</h2>
+              <div className="flex flex-col gap-1.5 overflow-y-auto flex-1 pr-1 min-h-0">
                 {categories.map((cat) => {
                   const pct = cat.limit > 0 ? (cat.spent / cat.limit) * 100 : 0;
                   const isHov = hoveredCat === cat.name;
@@ -271,6 +276,17 @@ export default function Dashboard() {
                           >
                             {Math.round(pct)}%
                           </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const match = categoryList.find((c) => c.name === cat.name);
+                              if (match) setDeletingCategory(match);
+                            }}
+                            title="Delete category"
+                            className="text-sub hover:text-red text-[10px] bg-transparent border-none cursor-pointer p-2 -my-2 leading-none"
+                          >
+                            🗑️
+                          </button>
                         </div>
                       </div>
                       <div className="h-1 rounded-full" style={{ background: `${cat.color}20` }}>
@@ -337,10 +353,22 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       {modal && <AddEntryModal type={modal} onClose={() => setModal(null)} onSaved={loadData} categories={categories} />}
       {showCards && <ViewCardsModal onClose={() => setShowCards(false)} />}
+      {deletingCategory && (
+        <ConfirmModal
+          title="Delete Category"
+          body={`Delete "${deletingCategory.name}"? Any transactions tagged with this category will be deleted too. This can't be undone.`}
+          cta="Delete"
+          onClose={() => setDeletingCategory(null)}
+          onConfirm={async () => {
+            await api.deleteCategory(deletingCategory.id);
+            await loadData();
+          }}
+        />
+      )}
     </div>
   );
 }

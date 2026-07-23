@@ -28,6 +28,7 @@ export default function ConfirmModal({
 
   const canConfirm = confirmWord ? confirmText === confirmWord : true;
   const accentColor = danger ? C.red : C.accent;
+  const buttonColor = danger ? C.redDark : C.accentDark;
 
   async function handleConfirm() {
     if (!canConfirm) return;
@@ -94,8 +95,8 @@ export default function ConfirmModal({
             onClick={handleConfirm}
             className="flex-[2] py-[11px] rounded-[9px] border-none text-white font-bold text-sm disabled:cursor-not-allowed"
             style={{
-              background: canConfirm ? accentColor : `${accentColor}40`,
-              boxShadow: canConfirm ? `0 0 20px ${accentColor}55` : "none",
+              background: canConfirm ? buttonColor : `${buttonColor}40`,
+              boxShadow: canConfirm ? `0 0 20px ${buttonColor}55` : "none",
             }}
           >
             {loading ? "Working..." : cta}

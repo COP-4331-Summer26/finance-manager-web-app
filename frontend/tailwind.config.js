@@ -12,13 +12,26 @@ export default {
         accent: {
           DEFAULT: "#6366F1",
           light:   "#818CF8",
+          dark:    "#4338CA",
         },
-        cyan:  "#22D3EE",
+        cyan: {
+          DEFAULT: "#22D3EE",
+          dark: "#0E7490",
+        },
         text:  "#F1F5F9",
-        sub:   "#5A6481",
-        green: "#10B981",
-        red:   "#F43F5E",
-        amber: "#F59E0B",
+        sub:   "#8790AC",
+        green: {
+          DEFAULT: "#10B981",
+          dark: "#047857",
+        },
+        red: {
+          DEFAULT: "#F43F5E",
+          dark: "#BE123C",
+        },
+        amber: {
+          DEFAULT: "#F59E0B",
+          dark: "#B45309",
+        },
       },
     },
   },

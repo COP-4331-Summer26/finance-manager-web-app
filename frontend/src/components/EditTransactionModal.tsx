@@ -76,7 +76,7 @@ export default function EditTransactionModal({ transaction, categories, onClose,
             />
             <h2 className="text-text font-bold text-[17px] m-0">Edit Transaction</h2>
           </div>
-          <button onClick={onClose} className="bg-transparent border-none text-sub cursor-pointer text-lg leading-none">
+          <button onClick={onClose} className="bg-transparent border-none text-sub cursor-pointer text-lg leading-none p-2 -m-2">
             ✕
           </button>
         </div>
@@ -136,7 +136,7 @@ export default function EditTransactionModal({ transaction, categories, onClose,
             onClick={handleSave}
             disabled={saving}
             className="flex-[2] py-[11px] rounded-[9px] border-none text-white font-bold text-sm disabled:opacity-60"
-            style={{ background: C.accent, boxShadow: `0 0 20px ${C.accent}55` }}
+            style={{ background: C.accentDark, boxShadow: `0 0 20px ${C.accentDark}55` }}
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>
