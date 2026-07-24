@@ -4,13 +4,12 @@ const authenticate = require('../middleware/auth');
 const {
   getCategories,
   createCategory,
-  updateCategory
+  updateCategory,
+  deleteCategory
 } = require('../controllers/categoryController');
-
 router.use(authenticate);
-
 router.get('/', getCategories);
 router.post('/', createCategory);
 router.put('/:id', updateCategory);
-
+router.delete('/:id', deleteCategory);
 module.exports = router;

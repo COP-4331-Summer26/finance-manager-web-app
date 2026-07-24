@@ -16,7 +16,6 @@ exports.createCard = async (req, res) => {
     if (!name || !last4 || limit == null || statementDate == null) {
       return res.status(400).json({ error: 'name, last4, limit, and statementDate are required' });
     }
-
     const card = await Card.create({
       userId: req.user.id,
       name,
@@ -31,5 +30,19 @@ exports.createCard = async (req, res) => {
       return res.status(400).json({ error: err.message });
     }
     res.status(500).json({ error: 'Failed to create card' });
+  }
+};
+
+exports.deleteCard = async (req, res) => {
+  try {
+    const card = await Card.findOneAndDelete({
+      _id: req.params.id,
+      userId: req.user.id
+    });
+    if (!card) return res.status(404).json({ error: 'Card not found' });
+    res.json({ message: 'Card deleted' });
+  } catch (err) {
+    console.error('deleteCard error:', err);
+    res.status(500).json({ error: 'Failed to delete card' });
   }
 };
